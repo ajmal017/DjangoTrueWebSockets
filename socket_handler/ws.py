@@ -70,4 +70,3 @@ app['websockets'] = weakref.WeakSet()
 
 if __name__ == '__main__':
     web.run_app(app)
-

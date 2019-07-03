@@ -1,0 +1,5 @@
+django<2.3
+redis<3.3
+
+aiohttp<3.6
+aioredis<1.3

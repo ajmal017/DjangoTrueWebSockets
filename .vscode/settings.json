@@ -1,0 +1,10 @@
+{
+    "python.pythonPath": ".env/bin/python",
+    "sqltools.connections": [
+        {
+            "database": "./db.sqlite3",
+            "dialect": "SQLite",
+            "name": "sqlite"
+        }
+    ]
+}
