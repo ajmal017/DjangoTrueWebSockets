@@ -1,0 +1,28 @@
+.pop-ups {
+    border: 1px solid black;
+    /* display: inline-block; */
+    padding: 1px;
+    position: fixed;
+    right: 0%;
+    bottom: 0%;
+    width: 200px;
+}
+
+
+.pop-up {
+    margin: 2px;
+    border: 1px solid gray;
+    border-radius: 6px;
+    /* min-height: 2rem; */
+
+    transition: max-height 2s ease;
+    max-height: 3rem;
+    
+    /* line-height:0; */
+    /* display: block; */
+}
+
+.toggle {
+    overflow: hidden;
+    max-height: 0;
+}
