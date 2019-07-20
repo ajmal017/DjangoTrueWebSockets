@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from .forms import PostForm
-from .models import Post
+from .models import Post, PostSerializer
+from rest_framework.viewsets import ModelViewSet
 import redis
 
 
@@ -17,6 +18,11 @@ def post_view(request):
 
     posts = Post.objects.all()
     return render(request, 'blog/posts.html', {'form': form, 'posts': posts})
+
+
+class PostViewSet(ModelViewSet):
+    serializer_class = PostSerializer
+    queryset = Post.objects.all()
 
 
 def index_view(request):

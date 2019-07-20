@@ -1,10 +1,22 @@
 {
-    "python.pythonPath": ".env/bin/python",
+    "python.pythonPath": "~/.envs/DjangoTrueWebSockets/bin/python",
     "sqltools.connections": [
         {
             "database": "./db.sqlite3",
             "dialect": "SQLite",
             "name": "sqlite"
         }
-    ]
+    ],
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
+        "**/.DS_Store": true,
+        "**/.idea": true,
+        "**/__pycache__": true,
+    },
+    "python.linting.pylintEnabled": true,
+    "python.linting.enabled": true,
+    "python.linting.pylintArgs": ["--load-plugins", "pylint_django"]
 }

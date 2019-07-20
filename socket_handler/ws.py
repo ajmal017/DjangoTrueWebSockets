@@ -1,4 +1,4 @@
-from aiohttp import web
+from aiohttp import web, ClientSession
 import aiohttp
 import weakref
 import aioredis
@@ -12,6 +12,7 @@ routes = web.RouteTableDef()
 async def websocket_handler(request):
     ws = web.WebSocketResponse()
     await ws.prepare(request)
+    session = ClientSession()
 
     request.app['websockets'].add(ws)
     try:
@@ -19,6 +20,9 @@ async def websocket_handler(request):
             if msg.type == aiohttp.WSMsgType.TEXT:
                 if msg.data == 'close':
                     await ws.close()
+                elif msg.data == 'posts':
+                    async with session.get('http://127.0.0.1:8000/post/') as resp:
+                        await ws.send_json(await resp.json())
                 else:
                     await ws.send_str(msg.data + '/answer')
             elif msg.type == aiohttp.WSMsgType.ERROR:
@@ -26,6 +30,8 @@ async def websocket_handler(request):
                       ws.exception())
     finally:
         request.app['websockets'].discard(ws)
+    
+    await session.close()
 
     print('websocket connection closed')
     return ws

@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     socket.onmessage = function (event) {
+        console.log("Took", Date.now() - beg);
         console.log("Data: " + event.data);
         l.add(event.data);
     };
@@ -22,6 +23,13 @@ document.addEventListener('DOMContentLoaded', () => {
     socket.onerror = function (error) {
         console.log("Error: " + error.message);
     };
+
+    let beg = Date.now();
+    button = document.querySelector('#posts');
+    button.addEventListener('click', () => {
+        beg = Date.now();
+        socket.send('posts');
+    })
 
     const l = new PopupList();
     // l.add("Why not? 1");
