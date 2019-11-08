@@ -1,8 +1,20 @@
-from aiohttp import web, ClientSession
-import aiohttp
-import weakref
-import aioredis
 import asyncio
+import os
+import weakref
+
+import aiohttp
+import aioredis
+import srvlookup
+from aiohttp import web, ClientSession
+
+REDIS_HOST = os.environ['REDIS_HOST']
+try:
+    results = srvlookup.lookup('http', 'tcp', 'django')
+    DJANGO_HOST = results[0].host
+    DJANGO_PORT = results[0].port
+except srvlookup.SRVQueryFailure:
+    DJANGO_HOST = os.environ['DJANGO_HOST']
+    DJANGO_PORT = os.environ['DJANGO_PORT']
 
 
 routes = web.RouteTableDef()
@@ -21,7 +33,7 @@ async def websocket_handler(request):
                 if msg.data == 'close':
                     await ws.close()
                 elif msg.data == 'posts':
-                    async with session.get('http://127.0.0.1:8000/post/') as resp:
+                    async with session.get(f'http://{DJANGO_HOST}:{DJANGO_PORT}/post/') as resp:  # TODO: settings
                         await ws.send_json(await resp.json())
                 else:
                     await ws.send_str(msg.data + '/answer')
@@ -44,22 +56,32 @@ async def on_shutdown(app):
 
 
 async def listen_to_redis(app):
+    sub = None
+    chanel_name = 'new_post'
     try:
-        sub = await aioredis.create_redis(('localhost', 6379), loop=app.loop)
-        ch, *_ = await sub.subscribe('new_post')
+        sub = await aioredis.create_redis((REDIS_HOST, 6379), timeout=2)  # loop=app.loop
+        ch, *_ = await sub.subscribe(chanel_name)
         async for msg in ch.iter(encoding='utf-8'):
             # Forward message to all connected websockets:
             for ws in app['websockets']:
                 await ws.send_str('{}: {}'.format(ch.name, msg))
     except asyncio.CancelledError:
         pass
+    except ConnectionRefusedError:
+        print('Redis conn refused')
+    except Exception:
+        print('EXCEPTION')
+        raise
     finally:
-        await sub.unsubscribe(ch.name)
-        await sub.quit()
+        if sub:
+            await sub.unsubscribe(chanel_name)
+            await sub.quit()
 
 
 async def start_background_tasks(app):
-    app['redis_listener'] = app.loop.create_task(listen_to_redis(app))
+    loop = asyncio.get_event_loop()
+    task = loop.create_task(listen_to_redis(app))
+    app['redis_listener'] = task  # asyncio.create_task()
 
 
 async def cleanup_background_tasks(app):

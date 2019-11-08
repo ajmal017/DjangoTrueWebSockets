@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chat-django
+  labels:
+    app: chat-django-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: chat-django-deployment
+  template:
+    metadata:
+      labels:
+        app: chat-django-deployment
+    spec:
+      containers:
+      - name: django
+        image: telicomm/k8s_chat:latest
+        imagePullPolicy: Always
+        command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+        env:
+          - name: PYTHONUNBUFFERED
+            value: "1"
+          - name: REDIS_HOST
+            value: "redis-master"
+        ports:
+          - containerPort: 8000
+      restartPolicy: Always
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chat-websocket
+  labels:
+    app: chat-websocket-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: chat-websocket-deployment
+  template:
+    metadata:
+      labels:
+        app: chat-websocket-deployment
+    spec:
+      containers:
+      - name: websockets
+        image: telicomm/k8s_chat:latest
+        imagePullPolicy: Always
+        command: ["python", "socket_handler/ws.py"]
+        env:
+          - name: PYTHONUNBUFFERED
+            value: "1"
+          - name: REDIS_HOST
+            value: "redis-master"
+        ports:
+          - containerPort: 8080
+      restartPolicy: Always
+

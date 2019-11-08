@@ -1,5 +1,17 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const socket = new WebSocket("ws://127.0.0.1:8080/ws");
+    let loc = window.location;
+    let new_uri;
+    if (loc.protocol === "https:") {
+        new_uri = "wss://";
+    } else {
+        new_uri = "ws://";
+    }
+    if (loc.host.startsWith('localhost') || loc.host.startsWith('127.')) {
+        new_uri += loc.hostname + ":8080/ws";
+    } else {
+        new_uri += loc.host + "/ws"; // loc.pathname +
+    }
+    const socket = new WebSocket(new_uri);
 
     socket.onopen = function () {
         console.log("Connection established");

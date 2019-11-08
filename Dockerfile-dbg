@@ -1,0 +1,6 @@
+FROM telicomm/k8s_chat
+
+RUN pip install pydevd-pycharm==192.7142.42
+ENV DBG=1
+
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000", "--no-color"]

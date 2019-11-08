@@ -1,8 +1,10 @@
+import redis
+from django.conf import settings
 from django.shortcuts import render, redirect
+from rest_framework.viewsets import ModelViewSet
+
 from .forms import PostForm
 from .models import Post, PostSerializer
-from rest_framework.viewsets import ModelViewSet
-import redis
 
 
 def post_view(request):
@@ -10,7 +12,7 @@ def post_view(request):
         form = PostForm(request.POST)
         if form.is_valid():
             instance: Post = form.save()
-            red = redis.Redis()
+            red = redis.Redis(settings.REDIS_HOST)
             red.publish('new_post', str(instance))
             return redirect('/posts')
     else:
